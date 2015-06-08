@@ -113,7 +113,7 @@ div.user_disabled {
 	vertical-align: top;
 }
 
-#AD_Integration_role_equivalent_groups_sortable {
+ul.ui-sortable {
   border: 1px solid #eee;
   width: 60%;
   min-height: 20px;
@@ -123,7 +123,8 @@ div.user_disabled {
   float: left;
   margin-right: 10px;
 }
-#AD_Integration_role_equivalent_groups_sortable li {
+
+ul.ui-sortable li {
   margin: 0 5px 5px 5px;
   padding: 5px;
 }
