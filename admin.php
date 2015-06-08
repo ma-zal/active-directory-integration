@@ -15,7 +15,6 @@
 			}
 		}
 
-
 		// form send?
 		if ( is_multisite() && isset($_POST['action']) && $_POST['action'] == 'update') {
 			$this->_save_multisite_options($_POST);
@@ -69,6 +68,21 @@
     delete_button.click(function( eventObject) {
       delete_mapping(eventObject.target);
     });
+
+    // check if the domain controller is in the list of unreachable domain controllers
+    var reachable = jQuery('#AD_Integration_domain_controllers_unreachable option[value="' + domain_controller + '"]');
+    var icon = "ui-icon-clock";
+    if( reachable.length > 0) {
+      if( reachable.hasClass( "not-reachable")) {
+        icon = "ui-icon-cancel";
+      }
+      else if( reachable.hasClass( "reachable")) {
+        icon = "ui-icon-check";
+      }
+    }
+    jQuery('#AD_Integration_domain_controllers_sortable .' + li_class).append(
+      "<span class=\"ui-icon " + icon + "\" style=\"display: block; float: right;\"></span>"
+    );
 
     domain_controllers.sortable("refresh");
     message_field.removeClass("ui-state-error");
@@ -349,8 +363,34 @@ if ( !is_multisite() ) { ?>
                 <button id="button_add_domain_controller"><?php _e('Add Domain Controller', 'ad-integration'); ?></button></br>
                 <?php _e('Domain Controllers (e.g. "dc1.company.local" and "dc2.company.local")', 'ad-integration'); ?>
                 <span id="add_domain_controller_message"></span><br/>
-                <ul id="AD_Integration_domain_controllers_sortable"></ul>
-                <input type="hidden" name="AD_Integration_domain_controllers" id="AD_Integration_domain_controllers" value="<?php echo $this->_domain_controllers; ?>" /><br />
+                <div>
+                  <ul id="AD_Integration_domain_controllers_sortable"></ul><br/>
+                  <input type="hidden" name="AD_Integration_domain_controllers" id="AD_Integration_domain_controllers" value="<?php echo $this->_domain_controllers; ?>" />
+                </div>
+                <div>
+                  <span class="ui-icon ui-icon-check"  style="display: block; float: left;"></span> - Server is reachable<br/>
+                  <span class="ui-icon ui-icon-cancel" style="display: block; float: left;"></span> - Server is not reachable<br/>
+                  <span class="ui-icon ui-icon-clock"  style="display: block; float: left;"></span> - Server will be checked after saving options<br/>
+                  <select id="AD_Integration_domain_controllers_unreachable" style="display: none;">
+                  <?php
+                    // check if the domain controllers are accessible
+                    if (function_exists('fsockopen')) {
+                      $arrDCs = explode(";",$this->_domain_controllers);
+                      foreach($arrDCs as $dc) {
+                        if($fp = @fsockopen($dc,$this->_port,$errCode,$errStr,2)) {
+                            echo "<option class=\"reachable\" value=\"".$dc."\">".$dc."</option>";
+                            fclose($fp);
+                        } else {
+                            echo "<option class=\"not-reachable\" value=\"".$dc."\">".$dc."</option>";
+                        }
+                      }
+                      unset($arrDCs, $dc, $fp);
+                    } else {
+                      $this->_log(ADI_LOG_NOTICE,'Function fsockopen() not available. Can not check server ports.');
+                    }
+                  ?>
+                  </select>
+                </div>
               </td>
 						</tr>
 
