@@ -349,11 +349,11 @@ class ADIntegrationPlugin {
 				add_action('password_reset', array(&$this, 'disable_function'));
 			}
 			
-		    add_action('admin_print_styles', array(&$this, 'load_styles'));
-		    add_action('admin_print_scripts', array(&$this, 'load_scripts'));
-		    
-		    // Add new column to the user list
-		    if ($this->_show_user_status) {
+			add_action('admin_print_styles', array(&$this, 'load_styles'));
+			add_action('admin_print_scripts', array(&$this, 'load_scripts'));
+			
+			// Add new column to the user list
+			if ($this->_show_user_status) {
 				add_filter( 'manage_users_columns', array( &$this, 'manage_users_columns' ) );
 				add_filter( 'manage_users_custom_column', array( &$this, 'manage_users_custom_column' ), 10, 3 );
 			}
@@ -364,12 +364,11 @@ class ADIntegrationPlugin {
 			add_action('edit_user_profile', array(&$this, 'show_user_profile_disable_user'));
 			add_action('show_user_profile', array(&$this, 'show_user_profile_disable_user'));			
 			
-		    
-		    // Sync Back?
-		    if ($this->_syncback === true) {
+			// Sync Back?
+			if ($this->_syncback === true) {
 				add_action('personal_options_update', array(&$this, 'profile_update'));
 				add_action('edit_user_profile_update', array(&$this, 'profile_update'));
-		    }
+			}
 			
 
 			// TODO: auto_login feature must be tested
@@ -392,7 +391,7 @@ class ADIntegrationPlugin {
 				// generate a random password for manually added users 
 				add_action('check_passwords', array(&$this, 'generate_password'), 10, 3);
 			}
-			 			
+			
 			if (!class_exists('adLDAP')) {
 				require 'ad_ldap/adLDAP.php';
 			}
@@ -419,13 +418,18 @@ class ADIntegrationPlugin {
 	
 	public function load_styles() { 
 		wp_register_style('adintegration', plugins_url('css/adintegration.css', __FILE__ )  ,false, '1.7.1', 'screen');
+		wp_register_style('adintegration-jquery-ui', plugins_url('css/jquery-ui.css', __FILE__ )  ,false, '1.11.4', 'screen');
 		wp_enqueue_style('adintegration');
+		wp_enqueue_style('adintegration-jquery-ui');
 	}
 	
 	
 	public function load_scripts() {
-		wp_enqueue_script('jquery-ui-tabs');   // this is a wp default script
-		wp_enqueue_script('jquery-ui-dialog'); // this is a wp default script
+		wp_enqueue_script('jquery-ui-tabs');       // this is a wp default script
+		wp_enqueue_script('jquery-ui-dialog');     // this is a wp default script
+		wp_enqueue_script('jquery-ui-button');     // this is a wp default script
+		wp_enqueue_script('jquery-ui-sortable');   // this is a wp default script
+		wp_enqueue_script('jquery-ui-spinner');    // this is a wp default script
 	}
 	
 
@@ -521,7 +525,6 @@ class ADIntegrationPlugin {
 				add_option('AD_Integration_no_random_password', false);
 				add_option('AD_Integration_auto_update_password', false);
 				
-				
 				add_option('AD_Integration_max_login_attempts', '3');
 				add_option('AD_Integration_block_time', '30');
 				add_option('AD_Integration_user_notification', false);
@@ -530,7 +533,6 @@ class ADIntegrationPlugin {
 				add_option('AD_Integration_fallback_to_local_password', false);
 				add_option('AD_Integration_enable_lost_password_recovery', false);
 
-				
 				add_option('AD_Integration_syncback', false);
 				add_option('AD_Integration_syncback_use_global_user', false);
 				add_option('AD_Integration_syncback_global_user', '');
@@ -545,13 +547,9 @@ class ADIntegrationPlugin {
 				add_option('AD_Integration_disable_users', false);
 			}
 		}
-		
 	}
-	
-	
 	public function register_adi_settings()
 	{
-
 		// Server
 		register_setting('ADI-server-settings',	'AD_Integration_domain_controllers');
 		register_setting('ADI-server-settings', 'AD_Integration_port', array(&$this, 'sanitize_port'));
@@ -759,12 +757,11 @@ class ADIntegrationPlugin {
 						"network_timeout" => $this->_network_timeout	// network timeout*/ 
 						));
 		} catch (Exception $e) {
-    		$this->_log(ADI_LOG_ERROR,'adLDAP exception: ' . $e->getMessage());
-    		return false;
+			$this->_log(ADI_LOG_ERROR,'adLDAP exception: ' . $e->getMessage());
+			return false;
 		}
-					
-		$this->_log(ADI_LOG_NOTICE,'adLDAP object created.');							
-					
+		
+		$this->_log(ADI_LOG_NOTICE,'adLDAP object created.');
 		
 		
 		// Check for maximum login attempts
@@ -795,24 +792,21 @@ class ADIntegrationPlugin {
 				die(); // important !
 			} 
 		}
-		
-		
 
 		// This is where the action is.
 		$account_suffixes = explode(";",$this->_account_suffix);
 		foreach($account_suffixes AS $account_suffix) {
 			$account_suffix = trim($account_suffix);
-			$this->_log(ADI_LOG_NOTICE,'trying account suffix "'.$account_suffix.'"');			
+			$this->_log(ADI_LOG_NOTICE,'trying account suffix "'.$account_suffix.'"');
 			$this->_adldap->set_account_suffix($account_suffix);
 			if ( $this->_adldap->authenticate($username, $password) === true ) // Authenticate
-			{	
+			{
 				$this->_log(ADI_LOG_NOTICE,'Authentication successfull for "' . $username . $account_suffix.'"');
 				$this->_authenticated = true;
 				break;
 			}
 		}
 		
-
 		if ( $this->_authenticated == false )
 		{
 			$this->_log(ADI_LOG_ERROR,'Authentication failed');
@@ -897,8 +891,7 @@ class ADIntegrationPlugin {
 
 		$this->_log(ADI_LOG_NOTICE,'FINISHED');
 		return $user;
-	}	
-	
+	}
 
 	/*
 	 * Use local (WordPress) password check if needed and allowed
@@ -960,7 +953,7 @@ class ADIntegrationPlugin {
 			do_action('wp_login', $user_login);
 		}
 		*/
-    }	
+	}
 
 	/*
 	 * Generate a password for the user. This plugin does not
@@ -1015,8 +1008,6 @@ class ADIntegrationPlugin {
 		$errors = $this->errors;
 	}
 	
-	
-	
 	public function setLogLevel($level = 0) {
 		$this->_loglevel = (int)$level;
 	}
@@ -1025,14 +1016,11 @@ class ADIntegrationPlugin {
 		$this->_logfile = $filename;
 	}
 	
-	
 	public function disableDebug() {
 		echo '<pre>';
 		$this->debug = false;
 		echo '</pre>';
 	}
-	
-	
 	
 	
 	/**
@@ -1114,7 +1102,7 @@ class ADIntegrationPlugin {
 	public function display_options_page() {
 		include dirname( __FILE__ ) .'/admin.php';
 	}	
-				
+	
 	
 	/**
 	 * Show defined AD attributes on profile page
@@ -1175,29 +1163,29 @@ class ADIntegrationPlugin {
 					
 					?>
 					<tr>
-					  <?php if ($no_attribute) { // use as sub-headline ?>
-					  	<th colspan="2">
-					  	  <?php echo $description; ?>
-					  	</th>
-					  <?php } else {?>	
-					    <th><label for="<?php echo $metakey ?>"><?php echo $description; ?></label></th>
-					    <td><?php
-					    // editable only if this is our own personal profile page if Global Sync Back user is not set.
-					    if (($this->_syncback == true)
-					    		&& isset($all_attributes[$attribute]['sync']) 
-					        	&& ($all_attributes[$attribute]['sync'] == true) 
-					        	&& (($user->ID == $user_ID) || ($this->_syncback_use_global_user === true))) {
-					        // use textarea if we have a list
-					        if (isset($all_attributes[$attribute]['type']) && ($all_attributes[$attribute]['type'] == 'list')) {
-					        	echo '<textarea name="'.$metakey.'" id="'.$metakey.'" cols="30" rows="3">'.esc_html($value).'</textarea>';
-					        } else {
-						    	echo '<input type="text" name="'.$metakey.'" id="'.$metakey.'" value="'.esc_html($value).'" class="regular-text code">';
-					        }
-					    } else {
-					    	echo nl2br(esc_html($value));
-					  	}
-					  ?></td>
-					  <?php } ?>
+						<?php if ($no_attribute) { // use as sub-headline ?>
+							<th colspan="2">
+								<?php echo $description; ?>
+							</th>
+						<?php } else {?>	
+							<th><label for="<?php echo $metakey ?>"><?php echo $description; ?></label></th>
+							<td><?php
+							// editable only if this is our own personal profile page if Global Sync Back user is not set.
+							if (($this->_syncback == true)
+									&& isset($all_attributes[$attribute]['sync']) 
+										&& ($all_attributes[$attribute]['sync'] == true) 
+										&& (($user->ID == $user_ID) || ($this->_syncback_use_global_user === true))) {
+								// use textarea if we have a list
+								if (isset($all_attributes[$attribute]['type']) && ($all_attributes[$attribute]['type'] == 'list')) {
+									echo '<textarea name="'.$metakey.'" id="'.$metakey.'" cols="30" rows="3">'.esc_html($value).'</textarea>';
+								} else {
+									echo '<input type="text" name="'.$metakey.'" id="'.$metakey.'" value="'.esc_html($value).'" class="regular-text code">';
+								}
+							} else {
+								echo nl2br(esc_html($value));
+							}
+						?></td>
+						<?php } ?>
 					</tr>
 				<?php 
 				}
@@ -1224,8 +1212,6 @@ class ADIntegrationPlugin {
 			}
 		}
 	}
-	
-
 	
 	
 	/**
@@ -1282,7 +1268,7 @@ class ADIntegrationPlugin {
 			}
 			
 			// Only SyncBack if we have an AD-user and not a local user
-			if (isset($_POST['adi_samaccountname']) && ($_POST['adi_samaccountname'] != '')) { 
+			if (isset($_POST['adi_samaccountname']) && ($_POST['adi_samaccountname'] != '')) {
 			
 				// Get User Data
 				$userinfo = get_userdata($_POST['user_id']);
@@ -1391,9 +1377,9 @@ class ADIntegrationPlugin {
 					email.setAttribute('disabled','disabled');
 				}
 			</script>
-			<?php 
-		}		
-	}	
+			<?php
+		}
+	}
 	
 	/**
 	 * Prevent ADI users from changing their email (action user_profile_update_errors)
@@ -1405,13 +1391,13 @@ class ADIntegrationPlugin {
 	public function prevent_email_change(&$errors, $update, &$user)
 	{
 		if ($this->_prevent_email_change && ($this->_is_adi_user($user->ID)) && (!current_user_can('level_10'))) {
-		    $old = get_user_by('id', $user->ID);
+			$old = get_user_by('id', $user->ID);
 		
-		    if( $user->user_email != $old->user_email ) {
-		    	// reset to old email
+			if( $user->user_email != $old->user_email ) {
+				// reset to old email
 				$this->_log(ADI_LOG_DEBUG, 'Prevent email change on profile update for user "'.$user->user_login.'" ('.$user->ID.').');
-		        $user->user_email = $old->user_email;
-		    }
+				$user->user_email = $old->user_email;
+			}
 		}
 	}	
 	
@@ -1460,8 +1446,8 @@ class ADIntegrationPlugin {
 		}
 		
 		return $value;
-	}	
-		
+	}
+	
 	
 	/****************************************************************
 	 * STATIC FUNCTIONS
@@ -1494,23 +1480,22 @@ class ADIntegrationPlugin {
 		}
 		
 		if (($wpdb->get_var("show tables like '$table_name'") != $table_name) OR ($db_version != ADIntegrationPlugin::DB_VERSION)) { 
-	      
-	    	$sql = 'CREATE TABLE ' . $table_name . ' (
-		  			id bigint(20) NOT NULL AUTO_INCREMENT,
-		  			user_login varchar(60),
-		  			failed_login_time bigint(11),
-		  			UNIQUE KEY id (id)
-				  );';
+			$sql = 'CREATE TABLE ' . $table_name . ' (
+						id bigint(20) NOT NULL AUTO_INCREMENT,
+						user_login varchar(60),
+						failed_login_time bigint(11),
+						UNIQUE KEY id (id)
+					);';
 	
 			require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-	      	dbDelta($sql);
-	      
-	   		// store db version in the options
-	      	if ( is_multisite() ) {
-	      		add_site_option('AD_Integration_db_version', ADIntegrationPlugin::DB_VERSION);
-	      	} else {
-		   		add_option('AD_Integration_db_version', ADIntegrationPlugin::DB_VERSION);
-	      	}
+			dbDelta($sql);
+			
+			// store db version in the options
+			if ( is_multisite() ) {
+				add_site_option('AD_Integration_db_version', ADIntegrationPlugin::DB_VERSION);
+			} else {
+				add_option('AD_Integration_db_version', ADIntegrationPlugin::DB_VERSION);
+			}
 		}
 
 		// Upgrade?
@@ -1518,16 +1503,15 @@ class ADIntegrationPlugin {
 			
 			if (version_compare('1.0.1', $version_installed, '>') || ($version_installed == false)) {
 				// remove old needless options
-		      	if ( is_multisite() ) {
-		      		delete_site_option('AD_Integration_bind_user');
-		      		delete_site_option('AD_Integration_bind_pwd');
-		      	} else {
-			   		delete_option('AD_Integration_bind_user');
-		      		delete_option('AD_Integration_bind_pwd');
-		      	}
+				if ( is_multisite() ) {
+					delete_site_option('AD_Integration_bind_user');
+					delete_site_option('AD_Integration_bind_pwd');
+				} else {
+					delete_option('AD_Integration_bind_user');
+					delete_option('AD_Integration_bind_pwd');
+				}
 			}
 		}
-		
 	}
 	
 	
@@ -1621,7 +1605,7 @@ class ADIntegrationPlugin {
 		{
 			$results[] = trim($part);
 		}
-		return implode(';', $results);	
+		return implode(';', $results);
 	}
 	
 	/**
@@ -1642,7 +1626,7 @@ class ADIntegrationPlugin {
 			}
 		}
 		return implode("\n", $sanitized_lines);
-	}	
+	}
 
 	
 	/**
@@ -1667,7 +1651,7 @@ class ADIntegrationPlugin {
 			}
 		}
 		return implode(";", $sanitized_groups);
-	}		
+	}
 	
 	/**
 	 * Sanitize Additional User Attributes
@@ -1807,7 +1791,6 @@ class ADIntegrationPlugin {
 	}	
 	
 	
-	
 	/**
 	 * Sanitize new authcode
 	 * new_authcode is always resetted to false after a new authcode is generated
@@ -1854,117 +1837,117 @@ class ADIntegrationPlugin {
 			$this->_log(ADI_LOG_INFO,'loading options (WPMU) ...');
 			
 			// Server (5)
-			$this->_domain_controllers 			= get_site_option('AD_Integration_domain_controllers');
-			$this->_port 						= get_site_option('AD_Integration_port');
-			$this->_use_tls 					= get_site_option('AD_Integration_use_tls');
-			$this->_network_timeout				= (int)get_site_option('AD_Integration_network_timeout');
-			$this->_base_dn						= get_site_option('AD_Integration_base_dn');
+			$this->_domain_controllers	= get_site_option('AD_Integration_domain_controllers');
+			$this->_port								= get_site_option('AD_Integration_port');
+			$this->_use_tls							= get_site_option('AD_Integration_use_tls');
+			$this->_network_timeout			= (int)get_site_option('AD_Integration_network_timeout');
+			$this->_base_dn							= get_site_option('AD_Integration_base_dn');
 
 			// User (13)
-			$this->_account_suffix		 		= get_site_option('AD_Integration_account_suffix');
-			$this->_append_suffix_to_new_users 	= get_site_option('AD_Integration_append_suffix_to_new_users');
-			$this->_auto_create_user 			= (bool)get_site_option('AD_Integration_auto_create_user');
-			$this->_auto_update_user 			= (bool)get_site_option('AD_Integration_auto_update_user');
-			$this->_auto_update_description		= (bool)get_site_option('AD_Integration_auto_update_description');
-			$this->_default_email_domain 		= get_site_option('AD_Integration_default_email_domain');
-			$this->_duplicate_email_prevention  = get_site_option('AD_Integration_duplicate_email_prevention');
-			$this->_prevent_email_change  		= (bool)get_site_option('AD_Integration_prevent_email_change');
-			$this->_display_name				= get_site_option('AD_Integration_display_name');
-			$this->_show_user_status			= (bool)get_site_option('AD_Integration_show_user_status');
-			$this->_enable_password_change      = get_site_option('AD_Integration_enable_password_change');
-			$this->_no_random_password			= (bool)get_site_option('AD_Integration_no_random_password');
-			$this->_auto_update_password		= (bool)get_site_option('AD_Integration_auto_update_password');
+			$this->_account_suffix							= get_site_option('AD_Integration_account_suffix');
+			$this->_append_suffix_to_new_users	= get_site_option('AD_Integration_append_suffix_to_new_users');
+			$this->_auto_create_user						= (bool)get_site_option('AD_Integration_auto_create_user');
+			$this->_auto_update_user						= (bool)get_site_option('AD_Integration_auto_update_user');
+			$this->_auto_update_description			= (bool)get_site_option('AD_Integration_auto_update_description');
+			$this->_default_email_domain				= get_site_option('AD_Integration_default_email_domain');
+			$this->_duplicate_email_prevention	= get_site_option('AD_Integration_duplicate_email_prevention');
+			$this->_prevent_email_change				= (bool)get_site_option('AD_Integration_prevent_email_change');
+			$this->_display_name								= get_site_option('AD_Integration_display_name');
+			$this->_show_user_status						= (bool)get_site_option('AD_Integration_show_user_status');
+			$this->_enable_password_change			= get_site_option('AD_Integration_enable_password_change');
+			$this->_no_random_password					= (bool)get_site_option('AD_Integration_no_random_password');
+			$this->_auto_update_password				= (bool)get_site_option('AD_Integration_auto_update_password');
 			
 			// Authorization (3)
-			$this->_authorize_by_group 			= (bool)get_site_option('AD_Integration_authorize_by_group');
-			$this->_authorization_group 		= get_site_option('AD_Integration_authorization_group');
-			$this->_role_equivalent_groups 		= get_site_option('AD_Integration_role_equivalent_groups');
+			$this->_authorize_by_group			= (bool)get_site_option('AD_Integration_authorize_by_group');
+			$this->_authorization_group			= get_site_option('AD_Integration_authorization_group');
+			$this->_role_equivalent_groups	= get_site_option('AD_Integration_role_equivalent_groups');
 			
 			// Security (7)
-			$this->_fallback_to_local_password	= get_site_option('AD_Integration_fallback_to_local_password');
+			$this->_fallback_to_local_password		= get_site_option('AD_Integration_fallback_to_local_password');
 			$this->_enable_lost_password_recovery = (bool)get_site_option('AD_Integration_enable_lost_password_recovery');
-			$this->_max_login_attempts 			= (int)get_site_option('AD_Integration_max_login_attempts');
-			$this->_block_time 					= (int)get_site_option('AD_Integration_block_time');
-			$this->_user_notification	  		= (bool)get_site_option('AD_Integration_user_notification');
-			$this->_admin_notification			= (bool)get_site_option('AD_Integration_admin_notification');
-			$this->_admin_email					= get_site_option('AD_Integration_admin_email');
+			$this->_max_login_attempts						= (int)get_site_option('AD_Integration_max_login_attempts');
+			$this->_block_time										= (int)get_site_option('AD_Integration_block_time');
+			$this->_user_notification							= (bool)get_site_option('AD_Integration_user_notification');
+			$this->_admin_notification						= (bool)get_site_option('AD_Integration_admin_notification');
+			$this->_admin_email										= get_site_option('AD_Integration_admin_email');
 
 			// User Meta (8)
 			$this->_additional_user_attributes	= get_site_option('AD_Integration_additional_user_attributes');
-			$this->_usermeta_empty_overwrite	= (bool)get_site_option('AD_Integration_usermeta_empty_overwrite');
-			$this->_show_attributes				= (bool)get_site_option('AD_Integration_show_attributes');
-			$this->_attributes_to_show			= get_site_option('AD_Integration_attributes_to_show');
-			$this->_syncback					= (bool)get_site_option('AD_Integration_syncback');
-			$this->_syncback_use_global_user	= (bool)get_site_option('AD_Integration_syncback_use_global_user');
-			$this->_syncback_global_user		= get_site_option('AD_Integration_syncback_global_user');
-			$this->_syncback_global_pwd			= get_site_option('AD_Integration_syncback_global_pwd');
+			$this->_usermeta_empty_overwrite		= (bool)get_site_option('AD_Integration_usermeta_empty_overwrite');
+			$this->_show_attributes							= (bool)get_site_option('AD_Integration_show_attributes');
+			$this->_attributes_to_show					= get_site_option('AD_Integration_attributes_to_show');
+			$this->_syncback										= (bool)get_site_option('AD_Integration_syncback');
+			$this->_syncback_use_global_user		= (bool)get_site_option('AD_Integration_syncback_use_global_user');
+			$this->_syncback_global_user				= get_site_option('AD_Integration_syncback_global_user');
+			$this->_syncback_global_pwd					= get_site_option('AD_Integration_syncback_global_pwd');
 			
 			// Bulk Import (7)
-			$this->_bulkimport_enabled			= (bool)get_site_option('AD_Integration_bulkimport_enabled');
-			$this->_bulkimport_authcode 		= get_site_option('AD_Integration_bulkimport_authcode');
-			$this->_bulkimport_new_authcode		= (bool)get_site_option('AD_Integration_bulkimport_new_authcode');
+			$this->_bulkimport_enabled					= (bool)get_site_option('AD_Integration_bulkimport_enabled');
+			$this->_bulkimport_authcode					= get_site_option('AD_Integration_bulkimport_authcode');
+			$this->_bulkimport_new_authcode			= (bool)get_site_option('AD_Integration_bulkimport_new_authcode');
 			$this->_bulkimport_security_groups	= get_site_option('AD_Integration_bulkimport_security_groups');
-			$this->_bulkimport_user				= get_site_option('AD_Integration_bulkimport_user');
-			$this->_bulkimport_pwd				= get_site_option('AD_Integration_bulkimport_pwd');
-			$this->_disable_users				= (bool)get_site_option('AD_Integration_disable_users');
+			$this->_bulkimport_user							= get_site_option('AD_Integration_bulkimport_user');
+			$this->_bulkimport_pwd							= get_site_option('AD_Integration_bulkimport_pwd');
+			$this->_disable_users								= (bool)get_site_option('AD_Integration_disable_users');
 						
 		} else {
 			$this->_log(ADI_LOG_INFO,'loading options ...');
 			
 			// Server (5)
-			$this->_domain_controllers 			= get_option('AD_Integration_domain_controllers');
-			$this->_port 						= get_option('AD_Integration_port');
-			$this->_use_tls 					= get_option('AD_Integration_use_tls');
-			$this->_network_timeout				= (int)get_option('AD_Integration_network_timeout');
-			$this->_base_dn						= get_option('AD_Integration_base_dn');
+			$this->_domain_controllers	= get_option('AD_Integration_domain_controllers');
+			$this->_port								= get_option('AD_Integration_port');
+			$this->_use_tls							= get_option('AD_Integration_use_tls');
+			$this->_network_timeout			= (int)get_option('AD_Integration_network_timeout');
+			$this->_base_dn							= get_option('AD_Integration_base_dn');
 
 			// User (13)
-			$this->_account_suffix		 		= get_option('AD_Integration_account_suffix');
-			$this->_append_suffix_to_new_users 	= get_option('AD_Integration_append_suffix_to_new_users');
-			$this->_auto_create_user 			= (bool)get_option('AD_Integration_auto_create_user');
-			$this->_auto_update_user 			= (bool)get_option('AD_Integration_auto_update_user');
-			$this->_auto_update_description		= (bool)get_option('AD_Integration_auto_update_description');
-			$this->_default_email_domain 		= get_option('AD_Integration_default_email_domain');
-			$this->_duplicate_email_prevention  = get_option('AD_Integration_duplicate_email_prevention');
-			$this->_prevent_email_change  		= (bool)get_option('AD_Integration_prevent_email_change');
-			$this->_display_name				= get_option('AD_Integration_display_name');
-			$this->_show_user_status			= (bool)get_option('AD_Integration_show_user_status');
-			$this->_enable_password_change      = get_option('AD_Integration_enable_password_change');
-			$this->_no_random_password			= (bool)get_option('AD_Integration_no_random_password');
-			$this->_auto_update_password		= (bool)get_option('AD_Integration_auto_update_password');
+			$this->_account_suffix							= get_option('AD_Integration_account_suffix');
+			$this->_append_suffix_to_new_users	= get_option('AD_Integration_append_suffix_to_new_users');
+			$this->_auto_create_user						= (bool)get_option('AD_Integration_auto_create_user');
+			$this->_auto_update_user						= (bool)get_option('AD_Integration_auto_update_user');
+			$this->_auto_update_description			= (bool)get_option('AD_Integration_auto_update_description');
+			$this->_default_email_domain				= get_option('AD_Integration_default_email_domain');
+			$this->_duplicate_email_prevention	= get_option('AD_Integration_duplicate_email_prevention');
+			$this->_prevent_email_change				= (bool)get_option('AD_Integration_prevent_email_change');
+			$this->_display_name								= get_option('AD_Integration_display_name');
+			$this->_show_user_status						= (bool)get_option('AD_Integration_show_user_status');
+			$this->_enable_password_change			= get_option('AD_Integration_enable_password_change');
+			$this->_no_random_password					= (bool)get_option('AD_Integration_no_random_password');
+			$this->_auto_update_password				= (bool)get_option('AD_Integration_auto_update_password');
 			
 			// Authorization (3)
-			$this->_authorize_by_group 			= (bool)get_option('AD_Integration_authorize_by_group');
-			$this->_authorization_group 		= get_option('AD_Integration_authorization_group');
-			$this->_role_equivalent_groups 		= get_option('AD_Integration_role_equivalent_groups');
+			$this->_authorize_by_group			= (bool)get_option('AD_Integration_authorize_by_group');
+			$this->_authorization_group			= get_option('AD_Integration_authorization_group');
+			$this->_role_equivalent_groups	= get_option('AD_Integration_role_equivalent_groups');
 			
 			// Security (6)
-			$this->_fallback_to_local_password	= get_option('AD_Integration_fallback_to_local_password');
-			$this->_enable_lost_password_recovery = (bool)get_option('AD_Integration_enable_lost_password_recovery');
-			$this->_max_login_attempts 			= (int)get_option('AD_Integration_max_login_attempts');
-			$this->_block_time 					= (int)get_option('AD_Integration_block_time');
-			$this->_user_notification	  		= (bool)get_option('AD_Integration_user_notification');
-			$this->_admin_notification			= (bool)get_option('AD_Integration_admin_notification');
-			$this->_admin_email					= get_option('AD_Integration_admin_email');
+			$this->_fallback_to_local_password		= get_option('AD_Integration_fallback_to_local_password');
+			$this->_enable_lost_password_recovery	= (bool)get_option('AD_Integration_enable_lost_password_recovery');
+			$this->_max_login_attempts						= (int)get_option('AD_Integration_max_login_attempts');
+			$this->_block_time										= (int)get_option('AD_Integration_block_time');
+			$this->_user_notification							= (bool)get_option('AD_Integration_user_notification');
+			$this->_admin_notification						= (bool)get_option('AD_Integration_admin_notification');
+			$this->_admin_email										= get_option('AD_Integration_admin_email');
 
 			// User Meta (8)
 			$this->_additional_user_attributes	= get_option('AD_Integration_additional_user_attributes');
-			$this->_usermeta_empty_overwrite	= (bool)get_option('AD_Integration_usermeta_empty_overwrite');
-			$this->_show_attributes				= (bool)get_option('AD_Integration_show_attributes');
-			$this->_attributes_to_show			= get_option('AD_Integration_attributes_to_show');
-			$this->_syncback					= (bool)get_option('AD_Integration_syncback');
-			$this->_syncback_use_global_user	= (bool)get_option('AD_Integration_syncback_use_global_user');
-			$this->_syncback_global_user		= get_option('AD_Integration_syncback_global_user');
-			$this->_syncback_global_pwd			= get_option('AD_Integration_syncback_global_pwd');
+			$this->_usermeta_empty_overwrite		= (bool)get_option('AD_Integration_usermeta_empty_overwrite');
+			$this->_show_attributes							= (bool)get_option('AD_Integration_show_attributes');
+			$this->_attributes_to_show					= get_option('AD_Integration_attributes_to_show');
+			$this->_syncback										= (bool)get_option('AD_Integration_syncback');
+			$this->_syncback_use_global_user		= (bool)get_option('AD_Integration_syncback_use_global_user');
+			$this->_syncback_global_user				= get_option('AD_Integration_syncback_global_user');
+			$this->_syncback_global_pwd					= get_option('AD_Integration_syncback_global_pwd');
 			
 			// Bulk Import (7)
-			$this->_bulkimport_enabled			= (bool)get_option('AD_Integration_bulkimport_enabled');
-			$this->_bulkimport_authcode 		= get_option('AD_Integration_bulkimport_authcode');
-			$this->_bulkimport_new_authcode		= (bool)get_option('AD_Integration_bulkimport_new_authcode');
+			$this->_bulkimport_enabled					= (bool)get_option('AD_Integration_bulkimport_enabled');
+			$this->_bulkimport_authcode					= get_option('AD_Integration_bulkimport_authcode');
+			$this->_bulkimport_new_authcode			= (bool)get_option('AD_Integration_bulkimport_new_authcode');
 			$this->_bulkimport_security_groups	= get_option('AD_Integration_bulkimport_security_groups');
-			$this->_bulkimport_user				= get_option('AD_Integration_bulkimport_user');
-			$this->_bulkimport_pwd				= get_option('AD_Integration_bulkimport_pwd');
-			$this->_disable_users				= (bool)get_option('AD_Integration_disable_users');
+			$this->_bulkimport_user							= get_option('AD_Integration_bulkimport_user');
+			$this->_bulkimport_pwd							= get_option('AD_Integration_bulkimport_pwd');
+			$this->_disable_users								= (bool)get_option('AD_Integration_disable_users');
 			
 		}
 	}
@@ -1979,10 +1962,10 @@ class ADIntegrationPlugin {
 		$descriptions = array();
 		
 		// General
-	    $descriptions['cn'] = __('Common Name','ad-integration');
-	    $descriptions['givenname'] = __('First name','ad-integration');
+		$descriptions['cn'] = __('Common Name','ad-integration');
+		$descriptions['givenname'] = __('First name','ad-integration');
 		$descriptions['initials'] = __('Initials','ad-integration');
-	    $descriptions['sn'] = __('Last name','ad-integration');
+		$descriptions['sn'] = __('Last name','ad-integration');
 		$descriptions['displayname'] = __('Display name','ad-integration');
 		$descriptions['description'] = __('Description','ad-integration');
 		$descriptions['physicaldeliveryofficename'] = __('Office','ad-integration');
@@ -2024,7 +2007,6 @@ class ADIntegrationPlugin {
 		$descriptions['directreports'] = __('Direct reports','ad-integration');
 		
 		return $descriptions;
-		
 	}
 	
 	/**
@@ -2191,7 +2173,7 @@ class ADIntegrationPlugin {
 							$description = $attribute;
 						}
 					}
-					$attributes[$attribute]['description'] = $description;				
+					$attributes[$attribute]['description'] = $description;
 					$attributes[$attribute]['sync'] = $sync;
 					$attributes[$attribute]['show'] = true;
 				}
@@ -2270,7 +2252,7 @@ class ADIntegrationPlugin {
 	 */
 	protected function _save_multisite_options($arrPost) {
 		
- 		if ( is_multisite() ) {
+		if ( is_multisite() ) {
 
 			// Server 
 			if ($arrPost['option_page'] == 'ADI-server-settings') {
@@ -2340,8 +2322,8 @@ class ADIntegrationPlugin {
 				}
 
 				update_site_option('AD_Integration_authorize_by_group', (bool)$arrPost['AD_Integration_authorize_by_group']);
-			 	update_site_option('AD_Integration_authorization_group', $arrPost['AD_Integration_authorization_group']);
-			 	update_site_option('AD_Integration_role_equivalent_groups', $arrPost['AD_Integration_role_equivalent_groups']);
+				update_site_option('AD_Integration_authorization_group', $arrPost['AD_Integration_authorization_group']);
+				update_site_option('AD_Integration_role_equivalent_groups', $arrPost['AD_Integration_role_equivalent_groups']);
 			}
 			
 			// Security
@@ -2359,13 +2341,13 @@ class ADIntegrationPlugin {
 					$arrPost['AD_Integration_admin_notification'] = 0;
 				}
 				
-			 	update_site_option('AD_Integration_fallback_to_local_password', $arrPost['AD_Integration_fallback_to_local_password']);
-			 	update_site_option('AD_Integration_enable_lost_password_recovery', $arrPost['AD_Integration_enable_lost_password_recovery']);
-			 	update_site_option('AD_Integration_max_login_attempts', $arrPost['AD_Integration_max_login_attempts']);
-			 	update_site_option('AD_Integration_block_time', $arrPost['AD_Integration_block_time']);
-			 	update_site_option('AD_Integration_user_notification', $arrPost['AD_Integration_user_notification']);
-			 	update_site_option('AD_Integration_admin_notification', $arrPost['AD_Integration_admin_notification']);
-			 	update_site_option('AD_Integration_admin_email', $arrPost['AD_Integration_admin_email']);
+				update_site_option('AD_Integration_fallback_to_local_password', $arrPost['AD_Integration_fallback_to_local_password']);
+				update_site_option('AD_Integration_enable_lost_password_recovery', $arrPost['AD_Integration_enable_lost_password_recovery']);
+				update_site_option('AD_Integration_max_login_attempts', $arrPost['AD_Integration_max_login_attempts']);
+				update_site_option('AD_Integration_block_time', $arrPost['AD_Integration_block_time']);
+				update_site_option('AD_Integration_user_notification', $arrPost['AD_Integration_user_notification']);
+				update_site_option('AD_Integration_admin_notification', $arrPost['AD_Integration_admin_notification']);
+				update_site_option('AD_Integration_admin_email', $arrPost['AD_Integration_admin_email']);
 			}
 
 			// User Meta
@@ -2633,7 +2615,7 @@ class ADIntegrationPlugin {
 
 		// log errors
 		if (is_wp_error($return)) {
-   			$this->_log(ADI_LOG_ERROR, $return->get_error_message());
+				$this->_log(ADI_LOG_ERROR, $return->get_error_message());
 		}
 		
 		$user_id = username_exists($username);
@@ -3045,11 +3027,11 @@ class ADIntegrationPlugin {
 	protected function _generate_authcode()
 	{
 		$length = 20;
-	    $chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-	    $code = '';    
-	    for ($x = 0; $x < $length; $x++) {
-	        $code .= $chars[mt_rand(0, strlen($chars)-1)];
-	    }
+		$chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+		$code = '';
+		for ($x = 0; $x < $length; $x++) {
+			$code .= $chars[mt_rand(0, strlen($chars)-1)];
+		}
 		$this->_bulkimport_authcode =  $code;
 		
 		// Save authcode
@@ -3101,7 +3083,6 @@ class ADIntegrationPlugin {
 
 		// do we have a correct email address?
 		if (is_email($email)) {
-
 			// Load up the localization file if we're using WordPress in a different language
 			// Place it in this plugin's folder and name it "ad-integration-[value in wp-config].mo"
 			load_plugin_textdomain( 'ad-integration', false, dirname( plugin_basename( __FILE__ ) ) );
@@ -3109,7 +3090,6 @@ class ADIntegrationPlugin {
 			$blog_url = get_bloginfo('url');
 			$blog_name = get_bloginfo('name');
 			$blog_domain = preg_replace ('/^(http:\/\/)(.+)\/.*$/i','$2', $blog_url);
-			
 
 			$subject = '['.$blog_name.'] '.__('Account blocked','ad-integration');
 			$body = sprintf(__('Someone tried to login to %s (%s) with your username (%s) - but in vain. For security reasons your account is now blocked for %d seconds.','ad-integration'), $blog_name, $blog_url, $username, $this->_block_time);
@@ -3229,9 +3209,9 @@ class ADIntegrationPlugin {
 	 */
 	protected function _encrypt($text) {
 		if (function_exists('mcrypt_encrypt')) {
-		    $iv = md5('Active-Directory-Integration'); // not nice
-		    $key = substr(AUTH_SALT,0, mcrypt_get_key_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB));
-		    $encrypted_text = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $text, MCRYPT_MODE_ECB, $iv);
+			$iv = md5('Active-Directory-Integration'); // not nice
+			$key = substr(AUTH_SALT,0, mcrypt_get_key_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB));
+			$encrypted_text = mcrypt_encrypt(MCRYPT_RIJNDAEL_128, $key, $text, MCRYPT_MODE_ECB, $iv);
 		} else {
 			$this->_log(ADI_LOG_WARN,'Encrypting: mcrypt not installed.');
 			$encrypted_text = $text;
@@ -3248,11 +3228,11 @@ class ADIntegrationPlugin {
 	protected function _decrypt($encrypted_text) {
 		$encrypted_text = base64_decode($encrypted_text);
 		if (function_exists('mcrypt_decrypt')) {
-		    $iv = md5('Active-Directory-Integration');
-		    $key = substr(AUTH_SALT,0, mcrypt_get_key_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB));
-		    $text = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $encrypted_text, MCRYPT_MODE_ECB, $iv), "\0");
+			$iv = md5('Active-Directory-Integration');
+			$key = substr(AUTH_SALT,0, mcrypt_get_key_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_ECB));
+			$text = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $key, $encrypted_text, MCRYPT_MODE_ECB, $iv), "\0");
 		} else {
-			$text = $encrypted_text; 
+			$text = $encrypted_text;
 		}
 		return $text;
 	}
