@@ -417,19 +417,25 @@ class ADIntegrationPlugin {
 
 
 	public function load_styles() {
-		wp_register_style('adintegration', plugins_url('css/adintegration.css', __FILE__ )  ,false, '1.7.1', 'screen');
-		wp_register_style('adintegration-jquery-ui', plugins_url('css/jquery-ui.css', __FILE__ )  ,false, '1.11.4', 'screen');
-		wp_enqueue_style('adintegration');
-		wp_enqueue_style('adintegration-jquery-ui');
+		$screen = get_current_screen();
+		if ( strpos( $screen->id, 'settings_page_active-directory-integration') !== false ) {
+			wp_register_style('adintegration', plugins_url('css/adintegration.css', __FILE__ )  ,false, '1.7.1', 'screen');
+			wp_register_style('adintegration-jquery-ui', plugins_url('css/jquery-ui.css', __FILE__ )  ,false, '1.11.4', 'screen');
+			wp_enqueue_style('adintegration');
+			wp_enqueue_style('adintegration-jquery-ui');
+		}
 	}
 
 
 	public function load_scripts() {
-		wp_enqueue_script('jquery-ui-tabs');       // this is a wp default script
-		wp_enqueue_script('jquery-ui-dialog');     // this is a wp default script
-		wp_enqueue_script('jquery-ui-button');     // this is a wp default script
-		wp_enqueue_script('jquery-ui-sortable');   // this is a wp default script
-		wp_enqueue_script('jquery-ui-spinner');    // this is a wp default script
+		$screen = get_current_screen();
+		if ( strpos( $screen->id, 'settings_page_active-directory-integration') !== false ) {
+			wp_enqueue_script('jquery-ui-tabs');       // this is a wp default script
+			wp_enqueue_script('jquery-ui-dialog');     // this is a wp default script
+			wp_enqueue_script('jquery-ui-button');     // this is a wp default script
+			wp_enqueue_script('jquery-ui-sortable');   // this is a wp default script
+			wp_enqueue_script('jquery-ui-spinner');    // this is a wp default script
+		}
 	}
 
 
