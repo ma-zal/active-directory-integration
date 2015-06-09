@@ -30,7 +30,7 @@ table.attribute_descriptions td {
 	padding: 1px 2px;
 	font-size: 9px;
 }
-  
+
 table.attribute_descriptions th {
 	border: 1px solid #BBB;
 	border-collapse: collapse;
@@ -81,16 +81,16 @@ div.user_disabled {
 
 /* Caution! Ensure accessibility in print and other media types... */
 @media projection, screen { /* Use class for showing/hiding tab content, so that visibility can be better controlled in different media types... */
-    .ui-tabs-hide {
-        display: none;
-    }
+	.ui-tabs-hide {
+		display: none;
+	}
 }
 
 /* Hide useless elements in print layouts... */
 @media print {
-    .ui-tabs-nav {
-        display: none;
-    }
+	.ui-tabs-nav {
+		display: none;
+	}
 }
 
 /* Skin */
@@ -114,17 +114,17 @@ div.user_disabled {
 }
 
 ul.ui-sortable {
-  border: 1px solid #eee;
-  width: 60%;
-  min-height: 20px;
-  list-style-type: none;
-  margin: 0;
-  padding: 5px 0 0 0;
-  float: left;
-  margin-right: 10px;
+	border: 1px solid #eee;
+	width: 60%;
+	min-height: 20px;
+	list-style-type: none;
+	margin: 0;
+	padding: 5px 0 0 0;
+	float: left;
+	margin-right: 10px;
 }
 
 ul.ui-sortable li {
-  margin: 0 5px 5px 5px;
-  padding: 5px;
+	margin: 0 5px 5px 5px;
+	padding: 5px;
 }

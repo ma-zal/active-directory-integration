@@ -3,9 +3,6 @@
 		// Load up the localization file if we're using WordPress in a different language
 		// Place it in this plugin's folder and name it "ad-integration-[value in wp-config].mo"
 		load_plugin_textdomain( 'ad-integration', false, dirname( plugin_basename( __FILE__ ) ) );
-		//wp_enqueue_script('jquery-ui-tabs');   // this is a wp default script
-		//plugins_url('css/adintegration.css', __FILE__ )  ,false, '1.7.1', 'screen');
-
 
 		if ( is_multisite() ) {
 			if (!is_super_admin()) {
@@ -24,167 +21,166 @@
 
 ?>
 <script type="text/javascript">
-  function delete_mapping(button) {
-    var message_field = jQuery('#add_role_group_message');
-    message_field.removeClass("ui-state-error");
-    message_field.addClass("ui-state-highlight");
-    var li_element = jQuery(button).parent();
-    li_element.children(".ui-icon").remove();
-    message_field.html("<?php _e('Removed mapping: ', 'ad-integration'); ?>" + li_element.html());
-    li_element.remove();
-//     jQuery("#AD_Integration_role_equivalent_groups_sortable").sortable("refresh");
-  }
+	function delete_mapping(button) {
+		var message_field = jQuery('#add_role_group_message');
+		message_field.removeClass("ui-state-error");
+		message_field.addClass("ui-state-highlight");
+		var li_element = jQuery(button).parent();
+		li_element.children(".ui-icon").remove();
+		message_field.html("<?php _e('Removed mapping: ', 'ad-integration'); ?>" + li_element.html());
+		li_element.remove();
+	}
 
-  function add_domain_controller( domain_controller) {
-    var message_field = jQuery('#add_domain_controller_message');
-    // is a domain controller given?
-    if( !domain_controller.trim()) {
-      message_field.removeClass("ui-state-highlight");
-      message_field.addClass("ui-state-error");
-      message_field.html("<?php _e('Please set the Domain Controller', 'ad-integration'); ?>");
-      return false;
-    }
-    // sortable list for controller
-    var domain_controllers = jQuery("#AD_Integration_domain_controllers_sortable");
-    // create a class name for the controller
-    var li_class = "domain_controller_" + domain_controller.replace(/\./g, '_');
-    // test if a list element for that controller already exists (prevent duplication)
-    if( domain_controllers.children("."+li_class).length) {
-      message_field.removeClass("ui-state-highlight");
-      message_field.addClass("ui-state-error");
-      message_field.html("<?php _e('This controller is already present - please change the order if this is your intention', 'ad-integration'); ?>");
-      return false;
-    }
+	function add_domain_controller( domain_controller) {
+		var message_field = jQuery('#add_domain_controller_message');
+		// is a domain controller given?
+		if( !domain_controller.trim()) {
+			message_field.removeClass("ui-state-highlight");
+			message_field.addClass("ui-state-error");
+			message_field.html("<?php _e('Please set the Domain Controller', 'ad-integration'); ?>");
+			return false;
+		}
+		// sortable list for controller
+		var domain_controllers = jQuery("#AD_Integration_domain_controllers_sortable");
+		// create a class name for the controller
+		var li_class = "domain_controller_" + domain_controller.replace(/\./g, '_');
+		// test if a list element for that controller already exists (prevent duplication)
+		if( domain_controllers.children("."+li_class).length) {
+			message_field.removeClass("ui-state-highlight");
+			message_field.addClass("ui-state-error");
+			message_field.html("<?php _e('This controller is already present - please change the order if this is your intention', 'ad-integration'); ?>");
+			return false;
+		}
 
-    domain_controllers.append(
-        "<li class=\"" + li_class + " ui-state-default\">"
-      + "<span class=\"ui-icon ui-icon-arrowthick-2-n-s\" style=\"float: left;\"></span>"
-      + "<span class=\"domain_controller\">" + domain_controller + "</span>"
-      + "<span class=\"ui-icon ui-icon-trash\" style=\"display: block; float: right;\"></span>"
-      + "</li>");
+		domain_controllers.append(
+			  "<li class=\"" + li_class + " ui-state-default\">"
+			+ "<span class=\"ui-icon ui-icon-arrowthick-2-n-s\" style=\"float: left;\"></span>"
+			+ "<span class=\"domain_controller\">" + domain_controller + "</span>"
+			+ "<span class=\"ui-icon ui-icon-trash\" style=\"display: block; float: right;\"></span>"
+			+ "</li>");
 
-    // register click event on the delete button
-    var delete_button = jQuery('#AD_Integration_domain_controllers_sortable .' + li_class + ' .ui-icon-trash');
-    delete_button.click(function( eventObject) {
-      delete_mapping(eventObject.target);
-    });
+		// register click event on the delete button
+		var delete_button = jQuery('#AD_Integration_domain_controllers_sortable .' + li_class + ' .ui-icon-trash');
+		delete_button.click(function( eventObject) {
+			delete_mapping(eventObject.target);
+		});
 
-    // check if the domain controller is in the list of unreachable domain controllers
-    var reachable = jQuery('#AD_Integration_domain_controllers_unreachable option[value="' + domain_controller + '"]');
-    var icon = "ui-icon-clock";
-    if( reachable.length > 0) {
-      if( reachable.hasClass( "not-reachable")) {
-        icon = "ui-icon-cancel";
-      }
-      else if( reachable.hasClass( "reachable")) {
-        icon = "ui-icon-check";
-      }
-    }
-    jQuery('#AD_Integration_domain_controllers_sortable .' + li_class).append(
-      "<span class=\"ui-icon " + icon + "\" style=\"display: block; float: right;\"></span>"
-    );
+		// check if the domain controller is in the list of unreachable domain controllers
+		var reachable = jQuery('#AD_Integration_domain_controllers_unreachable option[value="' + domain_controller + '"]');
+		var icon = "ui-icon-clock";
+		if( reachable.length > 0) {
+			if( reachable.hasClass( "not-reachable")) {
+				icon = "ui-icon-cancel";
+			}
+			else if( reachable.hasClass( "reachable")) {
+				icon = "ui-icon-check";
+			}
+		}
+		jQuery('#AD_Integration_domain_controllers_sortable .' + li_class).append(
+			"<span class=\"ui-icon " + icon + "\" style=\"display: block; float: right;\"></span>"
+		);
 
-    domain_controllers.sortable("refresh");
-    message_field.removeClass("ui-state-error");
-    message_field.addClass("ui-state-highlight");
-    message_field.html("<?php _e('Added controller', 'ad-integration'); ?>" + ": " + domain_controller);
+		domain_controllers.sortable("refresh");
+		message_field.removeClass("ui-state-error");
+		message_field.addClass("ui-state-highlight");
+		message_field.html("<?php _e('Added controller', 'ad-integration'); ?>" + ": " + domain_controller);
 
-    return true;
-  }
+		return true;
+	}
 
-  function add_role_equivalent_group( role_val, role_text, group) {
-    var message_field = jQuery('#add_role_group_message');
-    // is a group given?
-    if( !group.trim()) {
-      message_field.removeClass("ui-state-highlight");
-      message_field.addClass("ui-state-error");
-      message_field.html("<?php _e('Please set the Active Directory group', 'ad-integration'); ?>");
-      return false;
-    }
-    // sortable list for mapping
-    var ad_group_role_mapping = jQuery("#AD_Integration_role_equivalent_groups_sortable");
-    // create a class name composed of AD group and role
-    var li_class = "group_role_" + group + '_' + role_val;
-    // test if a list element with that combination already exists (prevent duplication)
-    if( ad_group_role_mapping.children("."+li_class).length) {
-      message_field.removeClass("ui-state-highlight");
-      message_field.addClass("ui-state-error");
-      message_field.html("<?php _e('This mapping is already present - please change the order if this is your intention', 'ad-integration'); ?>");
-      return false;
-    }
+	function add_role_equivalent_group( role_val, role_text, group) {
+		var message_field = jQuery('#add_role_group_message');
+		// is a group given?
+		if( !group.trim()) {
+			message_field.removeClass("ui-state-highlight");
+			message_field.addClass("ui-state-error");
+			message_field.html("<?php _e('Please set the Active Directory group', 'ad-integration'); ?>");
+			return false;
+		}
+		// sortable list for mapping
+		var ad_group_role_mapping = jQuery("#AD_Integration_role_equivalent_groups_sortable");
+		// create a class name composed of AD group and role
+		var li_class = "group_role_" + group + '_' + role_val;
+		// test if a list element with that combination already exists (prevent duplication)
+		if( ad_group_role_mapping.children("."+li_class).length) {
+			message_field.removeClass("ui-state-highlight");
+			message_field.addClass("ui-state-error");
+			message_field.html("<?php _e('This mapping is already present - please change the order if this is your intention', 'ad-integration'); ?>");
+			return false;
+		}
 
-    ad_group_role_mapping.append(
-        "<li class=\"" + li_class + " ui-state-default\">"
-      + "<span class=\"ui-icon ui-icon-arrowthick-2-n-s\" style=\"float: left;\"></span>"
-      + "<span class=\"text_ad_group\">" + group + "</span>" + "="
-      + "<span class=\"option_wp_role_text\">" + role_text + "</span>"
-      + "<span class=\"option_wp_role_val\" style=\"display: none;\">" + role_val + "</span>"
-      + "<span class=\"ui-icon ui-icon-trash\" style=\"display: block; float: right;\"></span>"
-      + "</li>");
+		ad_group_role_mapping.append(
+			  "<li class=\"" + li_class + " ui-state-default\">"
+			+ "<span class=\"ui-icon ui-icon-arrowthick-2-n-s\" style=\"float: left;\"></span>"
+			+ "<span class=\"text_ad_group\">" + group + "</span>" + "="
+			+ "<span class=\"option_wp_role_text\">" + role_text + "</span>"
+			+ "<span class=\"option_wp_role_val\" style=\"display: none;\">" + role_val + "</span>"
+			+ "<span class=\"ui-icon ui-icon-trash\" style=\"display: block; float: right;\"></span>"
+			+ "</li>");
 
-    // register click event on the delete button
-    var delete_button = jQuery('#AD_Integration_role_equivalent_groups_sortable .' + li_class + ' .ui-icon-trash');
-    delete_button.click(function( eventObject) {
-      delete_mapping(eventObject.target);
-    });
+		// register click event on the delete button
+		var delete_button = jQuery('#AD_Integration_role_equivalent_groups_sortable .' + li_class + ' .ui-icon-trash');
+		delete_button.click(function( eventObject) {
+			delete_mapping(eventObject.target);
+		});
 
-    ad_group_role_mapping.sortable("refresh");
-    message_field.removeClass("ui-state-error");
-    message_field.addClass("ui-state-highlight");
-    message_field.html("<?php _e('Added role equivalent group', 'ad-integration'); ?>");
+		ad_group_role_mapping.sortable("refresh");
+		message_field.removeClass("ui-state-error");
+		message_field.addClass("ui-state-highlight");
+		message_field.html("<?php _e('Added role equivalent group', 'ad-integration'); ?>");
 
-    return true;
-  }
+		return true;
+	}
 
-  function disassemble_domain_controllers_string( domain_controllers_string) {
-    var domain_controllers = domain_controllers_string.split(";");
-    jQuery.each( domain_controllers, function( index, domain_controller ) {
-      add_domain_controller( domain_controller);
-    });
-  }
+	function disassemble_domain_controllers_string( domain_controllers_string) {
+		var domain_controllers = domain_controllers_string.split(";");
+		jQuery.each( domain_controllers, function( index, domain_controller ) {
+			add_domain_controller( domain_controller);
+		});
+	}
 
-  function disassemble_role_equivalent_groups_string( role_equivalent_groups_string) {
-    var mappings    = role_equivalent_groups_string.split(";");
-    var role_select = jQuery('#select_wp_role');
-    jQuery.each( mappings, function( index, group_role ) {
-      var group_role_split = group_role.split("=");
-      var group = group_role_split[0];
-      var role = group_role_split[1];
-      var role_text = role;
-      var role_option = role_select.children( 'option[value="' + role + '"]');
-      if( role_option.length) {
-        role_text = role_option.html();
-      } else {
-        console.log("unknown wp_role: " + role);
-        role_text += " (" + "<?php _e('Unknown Role, might need to add one!', 'ad-integration'); ?>" + ")";
-      }
+	function disassemble_role_equivalent_groups_string( role_equivalent_groups_string) {
+		var mappings    = role_equivalent_groups_string.split(";");
+		var role_select = jQuery('#select_wp_role');
+		jQuery.each( mappings, function( index, group_role ) {
+			var group_role_split = group_role.split("=");
+			var group = group_role_split[0];
+			var role = group_role_split[1];
+			var role_text = role;
+			var role_option = role_select.children( 'option[value="' + role + '"]');
+			if( role_option.length) {
+				role_text = role_option.html();
+			} else {
+				console.log("unknown wp_role: " + role);
+				role_text += " (" + "<?php _e('Unknown Role, might need to add one!', 'ad-integration'); ?>" + ")";
+			}
 
-      add_role_equivalent_group( role, role_text, group);
-    });
-  }
+			add_role_equivalent_group( role, role_text, group);
+		});
+	}
 
-  function assemble_role_equivalent_groups_string() {
-    // sortable list for mapping
-    var ad_group_role_mapping = jQuery("#AD_Integration_role_equivalent_groups_sortable");
-    var role_equivalent_groups = new Array();;
-    ad_group_role_mapping.children('li').each( function(index, value){
-      var elem = jQuery(value);
-      var group = elem.children(".text_ad_group").html();
-      var role  = elem.children(".option_wp_role_val").html();
-      role_equivalent_groups.push( group + "=" + role);
-    });
-    return role_equivalent_groups.join(";");
-  }
+	function assemble_role_equivalent_groups_string() {
+		// sortable list for mapping
+		var ad_group_role_mapping = jQuery("#AD_Integration_role_equivalent_groups_sortable");
+		var role_equivalent_groups = new Array();;
+		ad_group_role_mapping.children('li').each( function(index, value){
+			var elem = jQuery(value);
+			var group = elem.children(".text_ad_group").html();
+			var role  = elem.children(".option_wp_role_val").html();
+			role_equivalent_groups.push( group + "=" + role);
+		});
+		return role_equivalent_groups.join(";");
+	}
 
-  function assemble_domain_controllers_string() {
-	    // sortable list for mapping
-	    var domain_controllers = jQuery("#AD_Integration_domain_controllers_sortable");
-	    var domain_controllers_array = new Array();;
-	    domain_controllers.children('li').each( function(index, value){
-	      domain_controllers_array.push( jQuery(value).children("span.domain_controller").html());
-	    });
-	    return domain_controllers_array.join(";");
-	  }
+	function assemble_domain_controllers_string() {
+			// sortable list for mapping
+			var domain_controllers = jQuery("#AD_Integration_domain_controllers_sortable");
+			var domain_controllers_array = new Array();;
+			domain_controllers.children('li').each( function(index, value){
+				domain_controllers_array.push( jQuery(value).children("span.domain_controller").html());
+			});
+			return domain_controllers_array.join(";");
+		}
 
 	// Tab handling
 	jQuery(document).ready(function($) {
@@ -203,50 +199,50 @@
 				return false;
 			});
 			$('#button_add_domain_controller').button().click(function( eventObject) {
-		    eventObject.preventDefault();
-		    var domain_controller = jQuery('#text_domain_controller').val();
-		    add_domain_controller( domain_controller);
-		    return;
+				eventObject.preventDefault();
+				var domain_controller = jQuery('#text_domain_controller').val();
+				add_domain_controller( domain_controller);
+				return;
 			});
-      $('#button_add_role_group').button().click(function( eventObject) {
-        eventObject.preventDefault();
-        // Active Directory group
-        var group = jQuery("#text_ad_group").val();
-        // get the selected wp-role
-        var role = jQuery("#select_wp_role :selected");
-        // try to add mapping
-        add_role_equivalent_group( role.val(), role.text(), group);
+			$('#button_add_role_group').button().click(function( eventObject) {
+				eventObject.preventDefault();
+				// Active Directory group
+				var group = jQuery("#text_ad_group").val();
+				// get the selected wp-role
+				var role = jQuery("#select_wp_role :selected");
+				// try to add mapping
+				add_role_equivalent_group( role.val(), role.text(), group);
 
-        return;
-      });
+				return;
+			});
 
-      // sortable mapping for domain controllers
-      jQuery("#AD_Integration_domain_controllers_sortable").sortable();
+			// sortable mapping for domain controllers
+			jQuery("#AD_Integration_domain_controllers_sortable").sortable();
 
-      // create the sortable list from the hidden field 'AD_Integration_domain_controllers'
-      disassemble_domain_controllers_string( jQuery('#AD_Integration_domain_controllers').val());
-      var domain_controllers_message_field = jQuery('#add_domain_controller_message');
-      domain_controllers_message_field.html("");
-      domain_controllers_message_field.removeClass("ui-state-highlight");
+			// create the sortable list from the hidden field 'AD_Integration_domain_controllers'
+			disassemble_domain_controllers_string( jQuery('#AD_Integration_domain_controllers').val());
+			var domain_controllers_message_field = jQuery('#add_domain_controller_message');
+			domain_controllers_message_field.html("");
+			domain_controllers_message_field.removeClass("ui-state-highlight");
 
-      // update the hidden field by assembling the domain_controllers string into 'AD_Integration_domain_controllers'
-      jQuery('#server form').submit( function( event) {
-        jQuery('#AD_Integration_domain_controllers').val(assemble_domain_controllers_string());
-      });
+			// update the hidden field by assembling the domain_controllers string into 'AD_Integration_domain_controllers'
+			jQuery('#server form').submit( function( event) {
+				jQuery('#AD_Integration_domain_controllers').val(assemble_domain_controllers_string());
+			});
 
-      // sortable list for role equivalent groups
-      jQuery("#AD_Integration_role_equivalent_groups_sortable").sortable();
+			// sortable list for role equivalent groups
+			jQuery("#AD_Integration_role_equivalent_groups_sortable").sortable();
 
-      // create the sortable list from the hidden field 'AD_Integration_role_equivalent_groups'
-      disassemble_role_equivalent_groups_string( jQuery('#AD_Integration_role_equivalent_groups').val());
-      var message_field = jQuery('#add_role_group_message');
-      message_field.html("");
-      message_field.removeClass("ui-state-highlight");
+			// create the sortable list from the hidden field 'AD_Integration_role_equivalent_groups'
+			disassemble_role_equivalent_groups_string( jQuery('#AD_Integration_role_equivalent_groups').val());
+			var message_field = jQuery('#add_role_group_message');
+			message_field.html("");
+			message_field.removeClass("ui-state-highlight");
 
-      // update the hidden field by assembling the role_equivalent_groups string into 'AD_Integration_role_equivalent_groups'
-      jQuery('#authorization form').submit( function( event) {
-        jQuery('#AD_Integration_role_equivalent_groups').val(assemble_role_equivalent_groups_string());
-      });
+			// update the hidden field by assembling the role_equivalent_groups string into 'AD_Integration_role_equivalent_groups'
+			jQuery('#authorization form').submit( function( event) {
+				jQuery('#AD_Integration_role_equivalent_groups').val(assemble_role_equivalent_groups_string());
+			});
 		});
 
 		// Jump to last used tab
@@ -308,25 +304,25 @@
 		<br/>
 	</div>
 	<h2><?php if ( is_multisite() ) {
-  	_e('Active Directory Integration', 'ad-integration');
-  } else {
-  	_e('Active Directory Integration Settings', 'ad-integration');
-  }?></h2>
+		_e('Active Directory Integration', 'ad-integration');
+	} else {
+		_e('Active Directory Integration Settings', 'ad-integration');
+	}?></h2>
 
 
-  	<?php
-  	if (!function_exists('ldap_connect')) {
-  		?>
-  		<h3><?php _e('ATTENTION: You have no LDAP support. This plugin won´t work.', 'ad-integration'); ?></h3>
-  		<p><?php  _e('You must install or enable LDAP support in PHP.', 'ad-integration');?>
-  		   <?php  _e('Further information: ', 'ad-integration'); ?><a href="http://php.net/manual/en/book.ldap.php" target="_blank">http://php.net/manual/en/book.ldap.php</a></p>
-  		<?php
-  		$this->_log(ADI_LOG_WARN,'No LDAP support.');
-  	}
+		<?php
+		if (!function_exists('ldap_connect')) {
+			?>
+			<h3><?php _e('ATTENTION: You have no LDAP support. This plugin won´t work.', 'ad-integration'); ?></h3>
+			<p><?php  _e('You must install or enable LDAP support in PHP.', 'ad-integration');?>
+			   <?php  _e('Further information: ', 'ad-integration'); ?><a href="http://php.net/manual/en/book.ldap.php" target="_blank">http://php.net/manual/en/book.ldap.php</a></p>
+			<?php
+			$this->_log(ADI_LOG_WARN,'No LDAP support.');
+		}
 	?>
 
 
-	<!--  TABS -->
+	<!-- TABS -->
 
 	<div id="slider" class="wrap">
 		<ul id="tabs">
@@ -344,7 +340,7 @@ if ( !is_multisite() ) { ?>
 <?php } ?>
 		</ul>
 
-    	<!-- TAB: Server  -->
+		<!-- TAB: Server -->
 
 		<div id="server">
 			<form action="<?php if ( !is_multisite() ) echo 'options.php#server'; ?>" method="post">
@@ -358,40 +354,40 @@ if ( !is_multisite() ) { ?>
 						<tr valign="top">
 							<th scope="row"><label for="AD_Integration_domain_controllers_sortable"><?php _e('Domain Controllers', 'ad-integration'); ?></label></th>
 							<td>
-                <label for="text_domain_controller"><?php _e('Domain Controller', 'ad-integration'); ?></label>
-                <input type="text" name="text_domain_controller" id="text_domain_controller"/>
-                <button id="button_add_domain_controller"><?php _e('Add Domain Controller', 'ad-integration'); ?></button></br>
-                <?php _e('Domain Controllers (e.g. "dc1.company.local" and "dc2.company.local")', 'ad-integration'); ?>
-                <span id="add_domain_controller_message"></span><br/>
-                <div>
-                  <ul id="AD_Integration_domain_controllers_sortable"></ul><br/>
-                  <input type="hidden" name="AD_Integration_domain_controllers" id="AD_Integration_domain_controllers" value="<?php echo $this->_domain_controllers; ?>" />
-                </div>
-                <div>
-                  <span class="ui-icon ui-icon-check"  style="display: block; float: left;"></span> - Server is reachable<br/>
-                  <span class="ui-icon ui-icon-cancel" style="display: block; float: left;"></span> - Server is not reachable<br/>
-                  <span class="ui-icon ui-icon-clock"  style="display: block; float: left;"></span> - Server will be checked after saving options<br/>
-                  <select id="AD_Integration_domain_controllers_unreachable" style="display: none;">
-                  <?php
-                    // check if the domain controllers are accessible
-                    if (function_exists('fsockopen')) {
-                      $arrDCs = explode(";",$this->_domain_controllers);
-                      foreach($arrDCs as $dc) {
-                        if($fp = @fsockopen($dc,$this->_port,$errCode,$errStr,2)) {
-                            echo "<option class=\"reachable\" value=\"".$dc."\">".$dc."</option>";
-                            fclose($fp);
-                        } else {
-                            echo "<option class=\"not-reachable\" value=\"".$dc."\">".$dc."</option>";
-                        }
-                      }
-                      unset($arrDCs, $dc, $fp);
-                    } else {
-                      $this->_log(ADI_LOG_NOTICE,'Function fsockopen() not available. Can not check server ports.');
-                    }
-                  ?>
-                  </select>
-                </div>
-              </td>
+								<label for="text_domain_controller"><?php _e('Domain Controller', 'ad-integration'); ?></label>
+								<input type="text" name="text_domain_controller" id="text_domain_controller"/>
+								<button id="button_add_domain_controller"><?php _e('Add Domain Controller', 'ad-integration'); ?></button></br>
+								<?php _e('Domain Controllers (e.g. "dc1.company.local" and "dc2.company.local")', 'ad-integration'); ?>
+								<span id="add_domain_controller_message"></span><br/>
+								<div>
+									<ul id="AD_Integration_domain_controllers_sortable"></ul><br/>
+									<input type="hidden" name="AD_Integration_domain_controllers" id="AD_Integration_domain_controllers" value="<?php echo $this->_domain_controllers; ?>" />
+								</div>
+								<div>
+									<span class="ui-icon ui-icon-check"  style="display: block; float: left;"></span> - Server is reachable<br/>
+									<span class="ui-icon ui-icon-cancel" style="display: block; float: left;"></span> - Server is not reachable<br/>
+									<span class="ui-icon ui-icon-clock"  style="display: block; float: left;"></span> - Server will be checked after saving options<br/>
+									<select id="AD_Integration_domain_controllers_unreachable" style="display: none;">
+									<?php
+										// check if the domain controllers are accessible
+										if (function_exists('fsockopen')) {
+											$arrDCs = explode(";",$this->_domain_controllers);
+											foreach($arrDCs as $dc) {
+												if($fp = @fsockopen($dc,$this->_port,$errCode,$errStr,2)) {
+													echo "<option class=\"reachable\" value=\"".$dc."\">".$dc."</option>";
+													fclose($fp);
+												} else {
+													echo "<option class=\"not-reachable\" value=\"".$dc."\">".$dc."</option>";
+												}
+											}
+											unset($arrDCs, $dc, $fp);
+										} else {
+											$this->_log(ADI_LOG_NOTICE,'Function fsockopen() not available. Can not check server ports.');
+										}
+									?>
+									</select>
+								</div>
+							</td>
 						</tr>
 
 						<tr valign="top">
@@ -554,9 +550,9 @@ if ( !is_multisite() ) { ?>
 						</tr>
 
 						<tr valign="top">
-						   <th colspan="2">
-						     <h4><?php _e('Password handling','ad-integration'); ?></h4>
-						   </th>
+							<th colspan="2">
+								<h4><?php _e('Password handling','ad-integration'); ?></h4>
+							</th>
 						</tr>
 
 						<tr valign="top">
@@ -631,26 +627,26 @@ if ( !is_multisite() ) { ?>
 							</td>
 						</tr>
 
-            <tr valign="top">
-              <th scope="row"><label for="AD_Integration_role_equivalent_groups_sortable"><?php _e('Role Equivalent Groups', 'ad-integration'); ?></label></th>
-              <td>
-                <label for="text_ad_group">Active Directory group</label>
-                <input type="text" name="text_ad_group" id="text_ad_group"/>
-                <label for="select_wp_role"><?php _e('user role to associate with group', 'ad-integration'); ?></label>
-                <select name="select_wp_role" id="select_wp_role"><?php wp_dropdown_roles('subscriber'); ?></select>
-                <button id="button_add_role_group"><?php _e('Add Role equivalent group', 'ad-integration'); ?></button></br>
-                    <ol style="list-style-type:decimal; margin-left:2em;font-size:11px;">
-                  <li><?php _e('Active Directory groups are case-sensitive.', 'ad-integration'); ?></li>
-                  <li><?php _e('Group memberships cannot be checked across domains.  So if you have two domains, instr and qc, and qc is the domain specified above, if instr is linked to qc, I can authenticate instr users, but not check instr group memberships.', 'ad-integration'); ?></li>
-                </ol>
+						<tr valign="top">
+							<th scope="row"><label for="AD_Integration_role_equivalent_groups_sortable"><?php _e('Role Equivalent Groups', 'ad-integration'); ?></label></th>
+							<td>
+								<label for="text_ad_group">Active Directory group</label>
+								<input type="text" name="text_ad_group" id="text_ad_group"/>
+								<label for="select_wp_role"><?php _e('user role to associate with group', 'ad-integration'); ?></label>
+								<select name="select_wp_role" id="select_wp_role"><?php wp_dropdown_roles('subscriber'); ?></select>
+								<button id="button_add_role_group"><?php _e('Add Role equivalent group', 'ad-integration'); ?></button></br>
+								<ol style="list-style-type:decimal; margin-left:2em;font-size:11px;">
+									<li><?php _e('Active Directory groups are case-sensitive.', 'ad-integration'); ?></li>
+									<li><?php _e('Group memberships cannot be checked across domains.  So if you have two domains, instr and qc, and qc is the domain specified above, if instr is linked to qc, I can authenticate instr users, but not check instr group memberships.', 'ad-integration'); ?></li>
+								</ol>
 
-                <span id="add_role_group_message"></span><br/>
-                <?php _e('List of Active Directory groups which correspond to WordPress user roles.', 'ad-integration'); ?><br/>
-                <?php _e('When a user is first created, his role will correspond to what is specified here.<br/>Format: AD-Group1=WordPress-Role1<br/> E.g., "Soc-Faculty=faculty" or "Faculty=faculty;Students=subscriber"<br/>A user will be created based on the first match, from top to bottom, so you should obviously put the more powerful groups first.', 'ad-integration'); ?><br/>
-                <ul id="AD_Integration_role_equivalent_groups_sortable"></ul>
-                <input type="hidden" name="AD_Integration_role_equivalent_groups" id="AD_Integration_role_equivalent_groups" value="<?php echo $this->_role_equivalent_groups; ?>"/>
-              </td>
-            </tr>
+								<span id="add_role_group_message"></span><br/>
+								<?php _e('List of Active Directory groups which correspond to WordPress user roles.', 'ad-integration'); ?><br/>
+								<?php _e('When a user is first created, his role will correspond to what is specified here.<br/>Format: AD-Group1=WordPress-Role1<br/> E.g., "Soc-Faculty=faculty" or "Faculty=faculty;Students=subscriber"<br/>A user will be created based on the first match, from top to bottom, so you should obviously put the more powerful groups first.', 'ad-integration'); ?><br/>
+								<ul id="AD_Integration_role_equivalent_groups_sortable"></ul>
+								<input type="hidden" name="AD_Integration_role_equivalent_groups" id="AD_Integration_role_equivalent_groups" value="<?php echo $this->_role_equivalent_groups; ?>"/>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 				<p class="submit">
@@ -663,7 +659,7 @@ if ( !is_multisite() ) { ?>
 
 		<div id="security">
 			<form action="<?php if ( !is_multisite() )echo 'options.php#security'; ?>" method="post">
-   				<?php settings_fields('ADI-security-settings'); ?>
+				<?php settings_fields('ADI-security-settings'); ?>
 				<table class="form-table">
 					<tbody>
 
@@ -758,7 +754,7 @@ if ( !is_multisite() ) { ?>
 			</div>
 
 			<form action="<?php if ( !is_multisite() )echo 'options.php#usermeta'; ?>" method="post">
-   				<?php settings_fields('ADI-usermeta-settings'); ?>
+				<?php settings_fields('ADI-usermeta-settings'); ?>
 				<table class="form-table">
 					<tbody>
 						<tr>
@@ -828,9 +824,9 @@ if ( !is_multisite() ) { ?>
 						</tr>
 
 						<tr valign="top">
-						   <th colspan="2">
-						     <h4><?php _e('Sync Back','ad-integration'); ?></h4>
-						   </th>
+							<th colspan="2">
+								<h4><?php _e('Sync Back','ad-integration'); ?></h4>
+							</th>
 						</tr>
 
 						<tr valign="top">
@@ -895,7 +891,7 @@ if ( !is_multisite() ) { ?>
 
 		<div id="bulkimport">
 			<form action="<?php if ( !is_multisite() )echo 'options.php#bulkimport'; ?>" method="post">
-   				<?php settings_fields('ADI-bulkimport-settings'); ?>
+				<?php settings_fields('ADI-bulkimport-settings'); ?>
 				<table class="form-table">
 					<tbody>
 						<tr>
