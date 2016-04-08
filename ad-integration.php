@@ -1,8 +1,8 @@
 <?php
 
 /*
-Plugin Name: Active Directory Integration
-Version: 1.1.7
+Plugin Name: Active Directory Integration 
+Version: 1.1.8
 Plugin URI: http://www.steindorff.de/wp-ad-integration
 Description: Allows WordPress to authenticate, authorize, create and update users through Active Directory
 Author: Christoph Steindorff
@@ -48,18 +48,18 @@ class ADIntegrationPlugin {
 
 	// version of needed DB table structure
 	const DB_VERSION = '0.9';
-	const ADI_VERSION = '1.1.7';
-
+	const ADI_VERSION = '1.1.8';
+	
 	// name of our own table
 	const TABLE_NAME = 'adintegration';
 
 
 	// is the user authenticated?
 	public $_authenticated = false;
-
-	protected $_minium_WPMU_version = '3.0';
-	protected $_minium_WP_version = '3.0';
-
+	
+	protected $_minium_WPMU_version = '4.0';
+	protected $_minium_WP_version = '4.0';
+	
 	// log level
 	protected $_loglevel = ADI_LOG_NONE;
 
@@ -2701,7 +2701,12 @@ class ADIntegrationPlugin {
 	protected function _update_user($username, $userinfo, $display_name='', $role = '', $password = '', $bulkimport = false)
 	{
 		global $wp_version;
-
+		
+					
+		/* Since WP 4.3 we have to disable email on password and email change */
+		add_filter('send_password_change_email', '__return_false');
+		add_filter('send_email_change_email', '__return_false');
+		
 		$info = $this->_create_info_array($userinfo);
 
 		// get UPN suffix
